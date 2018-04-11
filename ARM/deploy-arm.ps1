@@ -14,7 +14,7 @@ $acctName = $devConfig.azureaccount
 $subscriptionId = $devConfig.subscriptionid
 $resourceGroupName = $devConfig.resourcegroupname
 $resourceGroupLocation = $devConfig.resourcegrouplocation
-$deploymentName = $devConfig.deploymentname
+$deploymentName = $devConfig.deploymentname + '-' + ((Get-Date).ToUniversalTime()).ToString('MMdd-HHmm')
 
 <#
 ** Need to be confirmed ** :
