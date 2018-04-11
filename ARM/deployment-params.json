@@ -1,0 +1,7 @@
+{
+    "azureaccount": "[#YOUR_ADMIN_ACCOUNT#]",
+    "subscriptionid":"[#YOUR_SUBSCRIPTION_ID#]",
+    "resourcegroupname": "ExtUserOnboarding-rg",
+    "resourcegrouplocation":"Canada East",
+    "deploymentname":"OnBoardCheckAzureDeploy"
+}

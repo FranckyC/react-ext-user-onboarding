@@ -35,4 +35,20 @@ Version|Date|Comments
 
 ## Minimal Path to Awesome
 
-Deployment procedure here
+<h2>The ARM section contains:</h2>
+<p>
+The ARM repository contains the following files in order to deploy the Azure components.
+  <ul>
+    <li>A Dedicated Resources Group</li>
+    <li>An App Service Plan (we use a Consumption Plan)</li>
+    <li>A Storage Account</li>
+    <li>A Function App</li>
+  </ul>
+Set parameters according to your environment using the <i>deployment-params.json</i> file.<br>
+Execute the <i>deploy-arm.ps1</i> PowerShell script to launch the deployement.<br>
+Note: The Azure Account used for the deployment must be an Organizational Account (and probably also a Cloud Account - not tested) but not a Microsoft Account.
+</p>
+<p>
+The following configuration is applied:
+[TODO]
+</p>
