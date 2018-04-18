@@ -1,7 +1,7 @@
 {
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": { 
+    "parameters": {
         "appPrefix": {
             "type": "string",
             "metadata": {
@@ -14,35 +14,42 @@
                 "description": "Here the prefix of the storage account (3-19 chars lowercase & number only)"
             }
         },
-        "storageAccountType": {
+        "keyvaultPrefix": {
             "type": "string",
-            "defaultValue": "Standard_LRS",
-            "allowedValues": [
-                "Standard_LRS",
-                "Standard_GRS",
-                "Standard_RAGRS"                
-            ],
             "metadata": {
-                "description": "Storage Account type"
+                "description": "Here the prefix of the keyvault"
+            }
+        },
+        "keyvaultClientId": {
+            "type": "string",
+            "metadata": {
+                "description": "Client Id of the Keyvault"
+            }
+        },
+        "keyvaultClientSecret": {
+            "type": "string",
+            "metadata": {
+                "description": "Client Secret of the Keyvault"
             }
         }
-     },
+    },
     "variables": {
         "groupSuffix": "[substring(uniquestring(resourceGroup().id),0,5)]",
         "functionAppName": "[concat(parameters('appPrefix'), variables('groupSuffix'))]",
         "hostingPlanName": "[concat(parameters('appPrefix'), 'Hp', variables('groupSuffix'))]",
         "storageAccountName": "[concat(parameters('storageAccountPrefix'), variables('groupSuffix'))]",
-        "storageAccountid": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
-     },
-    "resources": [ 
+        "storageAccountid": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+        "keyvaultName": "[concat(parameters('keyvaultPrefix'), variables('groupSuffix'))]"
+    },
+    "resources": [
         {
             "type": "Microsoft.Storage/storageAccounts",
-            "name": "[variables('storageAccountName')]",
             "apiVersion": "2017-10-01",
+            "name": "[variables('storageAccountName')]",
             "location": "[resourceGroup().location]",
             "kind": "Storage",
             "sku": {
-                "name": "[parameters('storageAccountType')]"
+                "name": "Standard_LRS"
             }
         },
         {
@@ -50,23 +57,21 @@
             "apiVersion": "2016-09-01",
             "name": "[variables('hostingPlanName')]",
             "location": "[resourceGroup().location]",
-            "sku":{
+            "sku": {
                 "name": "Y1",
                 "tier": "Dynamic",
                 "size": "Y1",
                 "family": "Y",
                 "capacity": 0
             },
-            "properties":{
-                
-            }
+            "properties": {}
         },
         {
-            "apiVersion": "2016-08-01",
             "type": "Microsoft.Web/sites",
+            "apiVersion": "2016-08-01",
             "name": "[variables('functionAppName')]",
             "location": "[resourceGroup().location]",
-            "kind": "functionapp",            
+            "kind": "functionapp",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
@@ -94,16 +99,48 @@
                         {
                             "name": "FUNCTIONS_EXTENSION_VERSION",
                             "value": "~1"
+                        },
+                        {
+                            "name": "KeyVaultClientId",
+                            "value": "[parameters('keyvaultClientId')]"
+                        },
+                        {
+                            "name": "KeyVaultClientSecret",
+                            "value": "[parameters('keyvaultClientSecret')]"
+                        },
+                        {
+                            "name": "KeyVaultUri",
+                            "value": "[concat('https://', variables('keyvaultName'), '.vault.azure.net/')]"
                         }
                     ]
                 }
-            }          
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "name": "[variables('keyvaultName')]",
+            "apiVersion": "2016-10-01",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "scale": null,
+            "properties": {
+                "sku": {
+                    "family": "A",
+                    "name": "standard"
+                },
+                "tenantId": "[subscription().tenantId]",
+                "accessPolicies": [],
+                "enabledForDeployment": false,
+                "enabledForDiskEncryption": false,
+                "enabledForTemplateDeployment": false
+            },
+            "dependsOn": []
         }
-     ],
-    "outputs": { 
-        "FunctionAppName" : {
-            "type" : "string",
+    ],
+    "outputs": {
+        "FunctionAppName": {
+            "type": "string",
             "value": "[variables('functionAppName')]"
-          }
-     }
+        }
+    }
 }

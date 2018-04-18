@@ -1,7 +1,8 @@
 {
-    "azureaccount": "[#YOUR_ADMIN_ACCOUNT#]",
-    "subscriptionid":"[#YOUR_SUBSCRIPTION_ID#]",
-    "resourcegroupname": "ExtUserOnboarding-rg",
-    "resourcegrouplocation":"Canada East",
-    "deploymentname":"OnBoardCheckAzureDeploy"
+    "tenantname": "[your_tenant].onmicrosoft.com",
+    "azureaccount": "[your_admin_account]", 
+    "subscriptionid": "[your_subscription_id]",
+    "resourcegroupname": "SharePoint-ExtUserOnboarding-rg",
+    "resourcegrouplocation": "Canada East",
+    "deploymentname": "OnBoardCheckAzureDeploy"
 }
