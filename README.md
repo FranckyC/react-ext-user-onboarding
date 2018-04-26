@@ -33,6 +33,12 @@ Version|Date|Comments
 
 ---
 
+## Prerequisites
+
+- Install [Azure RM PowerShell Module](https://docs.microsoft.com/en-us/powershell/azure/install-azurerm-ps?view=azurermps-5.7.0)
+- Install [Azure PowerShell Module](https://docs.microsoft.com/en-us/powershell/azure/servicemanagement/install-azure-ps?view=azuresmps-4.0.00)
+- Install [Azure AD PowerShell Module](https://docs.microsoft.com/fr-ca/powershell/azure/active-directory/install-adv2?view=azureadps-2.0)
+
 ## Minimal Path to Awesome
 
 <h2>The ARM section contains:</h2>

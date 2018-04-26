@@ -21,7 +21,8 @@ export default class ExternalUserOnboardingWebPart extends BaseClientSideWebPart
     const element: React.ReactElement<IExternalUserOnboardingProps > = React.createElement(
       ExternalUserOnboarding,
       {
-        description: this.properties.description
+        description: this.properties.description,
+        context: this.context
       }
     );
 

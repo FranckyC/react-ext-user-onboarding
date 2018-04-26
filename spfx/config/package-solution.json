@@ -3,9 +3,15 @@
   "solution": {
     "name": "react-external-user-onboarding-client-side-solution",
     "id": "370f6f4f-0e9e-47cf-b25c-d87ae89c6d35",
-    "version": "1.0.0.0",
-    "includeClientSideAssets": true,
-    "skipFeatureDeployment": true
+    "version": "1.0.0.5",
+    "includeClientSideAssets": false,
+    "skipFeatureDeployment": true,
+    "webApiPermissionRequests": [
+      {
+        "resource": "AzureFunctionApp",
+        "scope": "user_impersonation"
+      }
+    ]
   },
   "paths": {
     "zippedPackage": "solution/react-external-user-onboarding.sppkg"
