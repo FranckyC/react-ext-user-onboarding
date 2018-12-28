@@ -1,4 +1,4 @@
-## react-external-user-onboarding
+## ext-user-onboarding-status
 
 This is where you include your WebPart documentation.
 

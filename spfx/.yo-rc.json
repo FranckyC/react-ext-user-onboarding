@@ -1,8 +1,11 @@
 {
   "@microsoft/generator-sharepoint": {
-    "version": "1.4.1",
-    "libraryName": "react-external-user-onboarding",
-    "libraryId": "370f6f4f-0e9e-47cf-b25c-d87ae89c6d35",
-    "environment": "spo"
+    "isCreatingSolution": true,
+    "environment": "onprem",
+    "version": "1.7.1",
+    "libraryName": "ext-user-onboarding-status",
+    "libraryId": "136b4e4b-0229-4edd-90b4-fa66afaa0438",
+    "packageManager": "npm",
+    "componentType": "webpart"
   }
 }

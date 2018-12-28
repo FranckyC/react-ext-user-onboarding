@@ -1,19 +1,11 @@
 {
-  "$schema": "https://dev.office.com/json-schemas/spfx-build/package-solution.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "react-external-user-onboarding-client-side-solution",
-    "id": "370f6f4f-0e9e-47cf-b25c-d87ae89c6d35",
-    "version": "1.0.0.5",
-    "includeClientSideAssets": false,
-    "skipFeatureDeployment": true,
-    "webApiPermissionRequests": [
-      {
-        "resource": "AzureFunctionApp",
-        "scope": "user_impersonation"
-      }
-    ]
+    "name": "ext-user-onboarding-status-client-side-solution",
+    "id": "136b4e4b-0229-4edd-90b4-fa66afaa0438",
+    "version": "1.0.0.0"
   },
   "paths": {
-    "zippedPackage": "solution/react-external-user-onboarding.sppkg"
+    "zippedPackage": "solution/ext-user-onboarding-status.sppkg"
   }
 }

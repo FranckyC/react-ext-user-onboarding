@@ -9,8 +9,7 @@
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules/@microsoft"
+      "./node_modules/@types"
     ],
     "types": [
       "es6-promise",

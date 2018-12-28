@@ -12,6 +12,7 @@
       "webRoot": "${workspaceRoot}",
       "sourceMaps": true,
       "sourceMapPathOverrides": {
+        "webpack:///.././src/*": "${webRoot}/src/*",
         "webpack:///../../../src/*": "${webRoot}/src/*",
         "webpack:///../../../../src/*": "${webRoot}/src/*",
         "webpack:///../../../../../src/*": "${webRoot}/src/*"
@@ -24,15 +25,14 @@
       "name": "Hosted workbench",
       "type": "chrome",
       "request": "launch",
-      "url": "https://collaborationcorner.sharepoint.com/teams/team1/SitePages/Test.aspx",
+      "url": "https://enter-your-SharePoint-site/_layouts/workbench.aspx",
       "webRoot": "${workspaceRoot}",
       "sourceMaps": true,
       "sourceMapPathOverrides": {
+        "webpack:///.././src/*": "${webRoot}/src/*",
         "webpack:///../../../src/*": "${webRoot}/src/*",
         "webpack:///../../../../src/*": "${webRoot}/src/*",
-        "webpack:///../../../../../src/*": "${webRoot}/src/*",
-        "webpack:///../../../../../../src/*": "${webRoot}/src/*",
-        "webpack:///../../../../../../../src/*": "${webRoot}/src/*"
+        "webpack:///../../../../../src/*": "${webRoot}/src/*"
       },
       "runtimeArgs": [
         "--remote-debugging-port=9222",

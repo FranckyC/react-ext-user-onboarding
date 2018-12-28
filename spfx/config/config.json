@@ -1,18 +1,13 @@
 {
-  "$schema": "https://dev.office.com/json-schemas/spfx-build/config.2.0.schema.json",
-  "version": "2.0",
-  "bundles": {
-    "external-user-onboarding-web-part": {
-      "components": [
-        {
-          "entrypoint": "./lib/webparts/externalUserOnboarding/ExternalUserOnboardingWebPart.js",
-          "manifest": "./src/webparts/externalUserOnboarding/ExternalUserOnboardingWebPart.manifest.json"
-        }
-      ]
+  "entries": [
+    {
+      "entry": "./lib/webparts/userStatusChecker/UserStatusCheckerWebPart.js",
+      "manifest": "./src/webparts/userStatusChecker/UserStatusCheckerWebPart.manifest.json",
+      "outputPath": "./dist/user-status-checker-web-part.js"
     }
-  },
+  ],
   "externals": {},
   "localizedResources": {
-    "ExternalUserOnboardingWebPartStrings": "lib/webparts/externalUserOnboarding/loc/{locale}.js"
+    "UserStatusCheckerWebPartStrings": "webparts/userStatusChecker/loc/{locale}.js"
   }
 }
