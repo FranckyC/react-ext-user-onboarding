@@ -1,11 +1,27 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "ext-user-onboarding-status-client-side-solution",
-    "id": "136b4e4b-0229-4edd-90b4-fa66afaa0438",
-    "version": "1.0.0.0"
+    "name": "ext-user-on-boarding-status-client-side-solution",
+    "id": "8adca312-e6aa-46e9-ad44-479c14bcc6ff",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "webApiPermissionRequests": [
+      {
+        "resource": "Windows Azure Active Directory",
+        "scope": "User.Read"
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "User.ReadBasic.All"
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "Directory.Read.All"
+      }
+    ]
   },
   "paths": {
-    "zippedPackage": "solution/ext-user-onboarding-status.sppkg"
+    "zippedPackage": "solution/ext-user-on-boarding-status.sppkg"
   }
 }

@@ -3,6 +3,11 @@ import { IUser, IUserStatus } from "../models/IUser";
 
 class MockUserService implements IUserService {
 
+    private _serviceUrl: string;
+
+    public get serviceUrl(): string { return this._serviceUrl; }
+    public set serviceUrl(value: string) { this._serviceUrl = value; }
+
     private _mockUsers: IUser[];
 
     public constructor() {
@@ -13,7 +18,7 @@ class MockUserService implements IUserService {
                 Email: "denis.morielli@aequos.ca",
                 FirstName: "Denis",
                 LastName: "Morielli",
-                Status: IUserStatus.InternalUser
+                Status: IUserStatus.InvitationAccepted
             },
             {
                 Email: "franck.cornu@aequos.ca",
@@ -27,13 +32,25 @@ class MockUserService implements IUserService {
             },
             {
                 Email: "franck.cornu@gmail.com",
-                Status: IUserStatus.InvitationPending
+                FirstName: "Franck",
+                LastName: "Cornu",
+                Status: IUserStatus.InvitationPendingAcceptance
             }
         ];
     }
 
-    public getUserStatus(userEmail: string): IUser {
-       return this._mockUsers.filter(e => { return e.Email === userEmail; })[0];
+    public getUserStatus(userEmail: string): Promise<IUser> {
+
+        let user: IUser = {
+            Email: userEmail,
+            Status: IUserStatus.DoesNotExist
+        };
+
+        user = this._mockUsers.filter(e => { return e.Email === userEmail; })[0];
+
+        return new Promise((resolve) => { 
+            setTimeout(resolve, 500, user);
+        });
     }
 }
 

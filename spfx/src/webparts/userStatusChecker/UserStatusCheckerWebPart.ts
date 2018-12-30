@@ -14,6 +14,7 @@ import IUserService from '../../services/IUserService';
 import UserService from '../../services/UserService';
 import MockUserService from '../../services/MockUserService';
 import IUserStatusCheckerContainerProps from './components/IUserStatusCheckerContainerProps';
+import { AdalClient } from '@pnp/common';
 
 export default class UserStatusCheckerWebPart extends BaseClientSideWebPart<IUserStatusCheckerWebPartProps> {
 
@@ -35,9 +36,12 @@ export default class UserStatusCheckerWebPart extends BaseClientSideWebPart<IUse
     if (Environment.type === EnvironmentType.Local) {
       this._userService = new MockUserService();
     } else {
-      this._userService = new UserService(this.properties.flowUrl);
+
+      const spfxAdalClient = AdalClient.fromSPFxContext(this.context);
+      this._userService = new UserService(this.context.httpClient, spfxAdalClient);
+      this._userService.serviceUrl = this.properties.flowUrl;
     }
-      
+
     return super.onInit();
   }
 
@@ -53,16 +57,14 @@ export default class UserStatusCheckerWebPart extends BaseClientSideWebPart<IUse
     return {
       pages: [
         {
-          header: {
-            description: strings.PropertyPaneDescription
-          },
           groups: [
             {
-              groupName: strings.BasicGroupName,
+              groupName: strings.PropertyPane.ServiceSettings,
               groupFields: [
                 PropertyPaneTextField('flowUrl', {
-                  label: "Flow URL",
-                  value: this.properties.flowUrl
+                  label: strings.PropertyPane.MsFlowUrl,
+                  value: this.properties.flowUrl,
+                  onGetErrorMessage: this._validateServiceUrl
                 })
               ]
             }
@@ -70,5 +72,24 @@ export default class UserStatusCheckerWebPart extends BaseClientSideWebPart<IUse
         }
       ]
     };
+  }
+
+  protected onPropertyPaneFieldChanged(propertyPath: string) {
+    if (propertyPath === 'flowUrl') {
+      this._userService.serviceUrl = this.properties.flowUrl;
+    }
+  }
+
+  /**
+   * Ensures the service URL is valid 
+   * @param value the service URL
+   */
+  private _validateServiceUrl(value: string) {
+
+    if ((!/^(https?):\/\/[^\s/$.?#].[^\s]*/.test(value) || !value)) {
+      return strings.PropertyPane.UrlErrorMessage;
+    } else {
+        return '';
+    }
   }
 }

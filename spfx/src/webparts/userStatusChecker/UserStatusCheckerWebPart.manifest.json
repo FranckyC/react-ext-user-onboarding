@@ -16,9 +16,9 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Other
     "group": { "default": "Other" },
-    "title": { "default": "UserStatusChecker" },
-    "description": { "default": "UserStatusChecker description" },
-    "officeFabricIconFontName": "Page",
+    "title": { "default": "User status checker", "en-us": "User status checker", "fr-fr": "Vérificateur du status de l'utilisateur" },
+    "description": { "default": "Allows to check for an user account in the organization directory", "en-us": "Allows to check for an user account in the organization directory", "fr-fr": "Permets de vérifier le statut d'un utilisateur dans l'annuaire de l'organisation" },
+    "officeFabricIconFontName": "UserFollowed",
     "properties": {
     }
   }]

@@ -1,4 +1,4 @@
-## ext-user-onboarding-status
+## ext-user-on-boarding-status
 
 This is where you include your WebPart documentation.
 

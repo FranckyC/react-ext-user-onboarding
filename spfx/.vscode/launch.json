@@ -25,7 +25,7 @@
       "name": "Hosted workbench",
       "type": "chrome",
       "request": "launch",
-      "url": "https://enter-your-SharePoint-site/_layouts/workbench.aspx",
+      "url": "https://collaborationcorner.sharepoint.com/teams/PnPIntranet/SitePages/gdf.aspx",
       "webRoot": "${workspaceRoot}",
       "sourceMaps": true,
       "sourceMapPathOverrides": {

@@ -1,10 +1,10 @@
 {
   "@microsoft/generator-sharepoint": {
     "isCreatingSolution": true,
-    "environment": "onprem",
+    "environment": "spo",
     "version": "1.7.1",
-    "libraryName": "ext-user-onboarding-status",
-    "libraryId": "136b4e4b-0229-4edd-90b4-fa66afaa0438",
+    "libraryName": "ext-user-on-boarding-status",
+    "libraryId": "8adca312-e6aa-46e9-ad44-479c14bcc6ff",
     "packageManager": "npm",
     "componentType": "webpart"
   }

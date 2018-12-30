@@ -2,6 +2,6 @@
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/deploy-azure-storage.schema.json",
   "workingDir": "./temp/deploy/",
   "account": "<!-- STORAGE ACCOUNT NAME -->",
-  "container": "ext-user-onboarding-status",
+  "container": "ext-user-on-boarding-status",
   "accessKey": "<!-- ACCESS KEY -->"
 }
