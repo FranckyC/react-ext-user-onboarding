@@ -1,0 +1,323 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "logicAppName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the logic app."
+            }
+        },
+        "logicAppLocation": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "string",
+            "metadata": {
+                "description": "Location of the logic app."
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Logic/workflows",
+            "name": "[parameters('logicAppName')]",
+            "apiVersion": "2016-06-01",
+            "location": "[parameters('logicAppLocation')]",
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$authentication": {
+                            "defaultValue": {},
+                            "type": "SecureObject"
+                        }
+                    },
+                    "triggers": {
+                        "manual": {
+                            "type": "Request",
+                            "kind": "Http",
+                            "inputs": {
+                                "schema": {
+                                    "$schema": "http://json-schema.org/draft-04/schema#",
+                                    "type": "object",
+                                    "properties": {
+                                        "userAccessToken": {
+                                            "type": "string"
+                                        },
+                                        "upn": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "userAccessToken",
+                                        "upn"
+                                    ]
+                                },
+                                "method": "POST"
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Check_if_Internal_User": {
+                            "actions": {
+                                "GetDomains": {
+                                    "runAfter": {},
+                                    "type": "Http",
+                                    "inputs": {
+                                        "method": "GET",
+                                        "uri": "https://graph.microsoft.com/beta/domains?$Select=id",
+                                        "headers": {
+                                            "Authorization": "Bearer @{triggerBody()['userAccessToken']}",
+                                            "Content-Type": "application/json;odata.metadata=minimal",
+                                            "Accept": "application/json;odata.metadata=minimal"
+                                        }
+                                    }
+                                },
+                                "Set_variable_ArrayCommonDomain": {
+                                    "runAfter": {
+                                        "GetDomains": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "SetVariable",
+                                    "inputs": {
+                                        "name": "ArrayCommonDomain",
+                                        "value": "@intersection(body('GetDomains').value, variables('ArrayUserDomain'))"
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "Initialize_ArrayCommonDomain": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Scope"
+                        },
+                        "If_Legitimate_User": {
+                            "actions": {
+                                "Check_and_Send_B2B_User_Status": {
+                                    "actions": {
+                                        "GetUser": {
+                                            "runAfter": {},
+                                            "type": "Http",
+                                            "inputs": {
+                                                "method": "GET",
+                                                "uri": "https://graph.microsoft.com/beta/users?$filter=mail eq '@{triggerBody()?['upn']}' or userPrincipalName eq '@{triggerBody()?['upn']}'",
+                                                "headers": {
+                                                    "Authorization": "Bearer @{triggerBody()['userAccessToken']}",
+                                                    "Content-Type": "application/json;odata.metadata=minimal",
+                                                    "Accept": "application/json;odata.metadata=minimal"
+                                                }
+                                            }
+                                        },
+                                        "If_user_exists": {
+                                            "actions": {
+                                                "Switch": {
+                                                    "runAfter": {
+                                                        "Set_ExternalUserStatus": [
+                                                            "Succeeded"
+                                                        ]
+                                                    },
+                                                    "cases": {
+                                                        "Case": {
+                                                            "case": "PendingAcceptance",
+                                                            "actions": {
+                                                                "SendPendingAcceptance": {
+                                                                    "runAfter": {},
+                                                                    "type": "Response",
+                                                                    "kind": "Http",
+                                                                    "inputs": {
+                                                                        "statusCode": 200,
+                                                                        "body": {
+                                                                            "Email": "@{triggerBody()?['upn']}",
+                                                                            "Status": "3"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        "Case_2": {
+                                                            "case": "Accepted",
+                                                            "actions": {
+                                                                "SendAccepted": {
+                                                                    "runAfter": {},
+                                                                    "type": "Response",
+                                                                    "kind": "Http",
+                                                                    "inputs": {
+                                                                        "statusCode": 200,
+                                                                        "body": {
+                                                                            "Email": "@{triggerBody()?['upn']}",
+                                                                            "Status": "4"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    "default": {
+                                                        "actions": {
+                                                            "UndeterminedUser": {
+                                                                "runAfter": {},
+                                                                "type": "Response",
+                                                                "kind": "Http",
+                                                                "inputs": {
+                                                                    "statusCode": 200,
+                                                                    "body": {
+                                                                        "Email": "@{triggerBody()?['upn']}",
+                                                                        "Status": "0"
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    "expression": "@variables('ExternalUserStatus')",
+                                                    "type": "Switch"
+                                                },
+                                                "Set_ExternalUserStatus": {
+                                                    "runAfter": {},
+                                                    "type": "SetVariable",
+                                                    "inputs": {
+                                                        "name": "ExternalUserStatus",
+                                                        "value": "@{actionBody('GetUser').value[0].externalUserState}"
+                                                    }
+                                                }
+                                            },
+                                            "runAfter": {
+                                                "GetUser": [
+                                                    "Succeeded"
+                                                ]
+                                            },
+                                            "else": {
+                                                "actions": {
+                                                    "SendUserNotExists": {
+                                                        "runAfter": {},
+                                                        "type": "Response",
+                                                        "kind": "Http",
+                                                        "inputs": {
+                                                            "statusCode": 200,
+                                                            "body": {
+                                                                "Email": "@{triggerBody()?['upn']}",
+                                                                "Status": "2"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "expression": "@equals(empty(body('GetUser').value), false)",
+                                            "type": "If"
+                                        }
+                                    },
+                                    "runAfter": {},
+                                    "type": "Scope"
+                                }
+                            },
+                            "runAfter": {
+                                "Check_if_Internal_User": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "else": {
+                                "actions": {
+                                    "SendUserInternal": {
+                                        "runAfter": {},
+                                        "type": "Response",
+                                        "kind": "Http",
+                                        "inputs": {
+                                            "statusCode": 200,
+                                            "body": {
+                                                "Email": "@{triggerBody()?['upn']}",
+                                                "Status": "1"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "expression": "@equals(length(variables('ArrayCommonDomain')), 0)",
+                            "type": "If"
+                        },
+                        "Initialize_userDomain": {
+                            "runAfter": {
+                                "Initialize_ExternalUserStatus": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "UserDomain",
+                                        "type": "String",
+                                        "value": "@{split(triggerBody()?['upn'], '@')[1]}"
+                                    }
+                                ]
+                            }
+                        },
+                        "Initialize_ExternalUserStatus": {
+                            "runAfter": {},
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "ExternalUserStatus",
+                                        "type": "String"
+                                    }
+                                ]
+                            },
+                            "description": "InternalUser = 1, DoesNotExist = 2, InvitationPending = 3, InvitationAccepted = 4, Undetermined = 0"
+                        },
+                        "Initialize_ArrayUserDomain": {
+                            "runAfter": {
+                                "Initialize_userDomain": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "ArrayUserDomain",
+                                        "type": "Array",
+                                        "value": [
+                                            {
+                                                "id": "@{variables('UserDomain')}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        "Initialize_ArrayCommonDomain": {
+                            "runAfter": {
+                                "Initialize_ArrayUserDomain": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "ArrayCommonDomain",
+                                        "type": "Array"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {},
+                "runtimeConfiguration": {
+                    "collections": {
+                        "maximumItemCount": 100000
+                    },
+                    "performanceProfile": {
+                        "throttles": {
+                            "mode": "Medium"
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
