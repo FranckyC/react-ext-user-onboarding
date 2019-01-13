@@ -11,14 +11,19 @@ class MockUserService implements IUserService {
     private _mockUsers: IUser[];
 
     public constructor() {
-        
+
         // Define here the mock users.
         this._mockUsers = [
+            {
+                Email: "dmorielli@free.fr",
+                Status: IUserStatus.UnknowStatus
+            },
             {
                 Email: "denis.morielli@aequos.ca",
                 FirstName: "Denis",
                 LastName: "Morielli",
-                Status: IUserStatus.InvitationAccepted
+                Status: IUserStatus.InvitationAccepted,
+                ConnectionName: "dmorielli@aequos.ca"
             },
             {
                 Email: "franck.cornu@aequos.ca",
@@ -34,7 +39,8 @@ class MockUserService implements IUserService {
                 Email: "franck.cornu@gmail.com",
                 FirstName: "Franck",
                 LastName: "Cornu",
-                Status: IUserStatus.InvitationPendingAcceptance
+                Status: IUserStatus.InvitationPendingAcceptance,
+                ConnectionName: "franck.cornu@aequos.ca"
             }
         ];
     }
@@ -48,7 +54,7 @@ class MockUserService implements IUserService {
 
         user = this._mockUsers.filter(e => { return e.Email === userEmail; })[0];
 
-        return new Promise((resolve) => { 
+        return new Promise((resolve) => {
             setTimeout(resolve, 500, user);
         });
     }

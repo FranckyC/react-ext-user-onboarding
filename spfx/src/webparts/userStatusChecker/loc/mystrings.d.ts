@@ -7,11 +7,13 @@ declare interface IUserStatusCheckerWebPartStrings {
   EmailErrorMessage: string;
   CheckStatusBtnLabel: string;
   UserStatus: {
+    UnknowStatus: string;
     InternalUser: string;
     DoesNotExist: string;
     InvitationPendingAcceptance: string;
     InvitationAccepted: string;
-  }
+  },
+  ConnectionName: string;
 }
 
 declare module 'UserStatusCheckerWebPartStrings' {

@@ -15,12 +15,12 @@ import { MessageBar, MessageBarType } from 'office-ui-fabric-react/lib/MessageBa
 export default class UserStatusCheckerContainer extends React.Component<IUserStatusCheckerContainerProps, IUserStatusCheckerContainerState> {
 
   public constructor(props: IUserStatusCheckerContainerProps) {
-    
+
     super(props);
 
     this.state = {
       isProcessing: false,
-      user:null,
+      user: null,
       userEmail: null,
       errorMessage: ''
     } as IUserStatusCheckerContainerState;
@@ -28,10 +28,10 @@ export default class UserStatusCheckerContainer extends React.Component<IUserSta
     this._checkUserStatus = this._checkUserStatus.bind(this);
     this._validateEmail = this._validateEmail.bind(this);
   }
-  
+
   public render(): React.ReactElement<IUserStatusCheckerContainerProps> {
 
-    let renderUserInfos: JSX.Element = null; 
+    let renderUserInfos: JSX.Element = null;
     let isProcessing = this.state.isProcessing;
     let renderError: JSX.Element = null;
     let renderOverlay: JSX.Element = null;
@@ -42,76 +42,83 @@ export default class UserStatusCheckerContainer extends React.Component<IUserSta
         primaryText: this.state.user.Email,
         size: PersonaSize.large,
       };
-            
-      switch (this.state.user.Status) {
-        case IUserStatus.DoesNotExist:  
 
+      switch (this.state.user.Status) {
+        case IUserStatus.UnknowStatus:
+          personaProps.presence = PersonaPresence.none;
+          personaProps.showUnknownPersonaCoin = true;
+          personaProps.secondaryText = strings.UserStatus.UnknowStatus;
+          break;
+
+        case IUserStatus.DoesNotExist:
           personaProps.presence = PersonaPresence.none;
           personaProps.showUnknownPersonaCoin = true;
           personaProps.secondaryText = strings.UserStatus.DoesNotExist;
+          break;
 
-          break;
-  
-        case IUserStatus.InternalUser:  
+        case IUserStatus.InternalUser:
           personaProps.presence = PersonaPresence.online;
-          personaProps.secondaryText =  strings.UserStatus.InternalUser;
-          break;    
-  
-        case IUserStatus.InvitationAccepted:  
-          personaProps.presence = PersonaPresence.online;
-          personaProps.secondaryText =  strings.UserStatus.InvitationAccepted;
+          personaProps.secondaryText = strings.UserStatus.InternalUser;
           break;
-  
-        case IUserStatus.InvitationPendingAcceptance:   
+
+        case IUserStatus.InvitationAccepted:
+          personaProps.presence = PersonaPresence.online;
+          personaProps.secondaryText = strings.UserStatus.InvitationAccepted;
+          personaProps.tertiaryText = strings.ConnectionName + this.state.user.ConnectionName;
+          break;
+
+        case IUserStatus.InvitationPendingAcceptance:
           personaProps.presence = PersonaPresence.away;
-          personaProps.secondaryText =  strings.UserStatus.InvitationPendingAcceptance;
-          break;    
+          personaProps.secondaryText = strings.UserStatus.InvitationPendingAcceptance;
+          personaProps.tertiaryText = strings.ConnectionName + this.state.user.ConnectionName;
+          break;
       }
 
-      renderUserInfos = 
-                      <div className={styles.userInfos}>
-                        <Persona {...personaProps}/>
-                      </div>;
+      renderUserInfos =
+        <div className={styles.userInfos}>
+          <Persona {...personaProps} />
+        </div>;
     }
 
 
     if (this.state.errorMessage) {
-      renderError = <div className={ styles.errorMessage }><MessageBar messageBarType={ MessageBarType.error} onDismiss={ () => { this.setState({ errorMessage: ''}); }} dismissButtonAriaLabel="Close">{this.state.errorMessage}</MessageBar></div>;
-    } 
-    
+      renderError = <div className={styles.errorMessage}><MessageBar messageBarType={MessageBarType.error} onDismiss={() => { this.setState({ errorMessage: '' }); }} dismissButtonAriaLabel="Close">{this.state.errorMessage}</MessageBar></div>;
+    }
+
     if (isProcessing) {
-      renderOverlay =   <div>
-                          <Overlay isDarkThemed={false} className={styles.overlay}>
-                              <Spinner size={SpinnerSize.medium} />   
-                          </Overlay>
-                        </div>;
+      renderOverlay = <div>
+        <Overlay isDarkThemed={false} className={styles.overlay}>
+          <Spinner size={SpinnerSize.medium} />
+        </Overlay>
+      </div>;
     }
 
     return (
-      <div className={ styles.userStatusChecker }>
+      <div className={styles.userStatusChecker}>
         {renderOverlay}
         {renderError}
-        <div className={ styles.searchBar }>
-          <TextField placeholder={"example@domain.com"} onChanged={ (value) => {
-                  this.setState({
-                    userEmail: value,
-                  });}}
-                  onKeyDown={ (event) => {
+        <div className={styles.searchBar}>
+          <TextField placeholder={"example@domain.com"} onChanged={(value) => {
+            this.setState({
+              userEmail: value,
+            });
+          }}
+            onKeyDown={(event) => {
 
-                    // Submit search on "Enter" 
-                    if (event.keyCode === 13 && this._validateEmail(this.state.userEmail) === '') {
-                      this._checkUserStatus(this.state.userEmail);
-                    }
-                  }}
-                  onGetErrorMessage={ this._validateEmail }
-                  deferredValidationTime={ 0 }
-                  validateOnLoad={ false }
+              // Submit search on "Enter"
+              if (event.keyCode === 13 && this._validateEmail(this.state.userEmail) === '') {
+                this._checkUserStatus(this.state.userEmail);
+              }
+            }}
+            onGetErrorMessage={this._validateEmail}
+            deferredValidationTime={0}
+            validateOnLoad={false}
           />
           <DefaultButton
-              data-automation-id="check"
-              disabled={!this.state.userEmail || isProcessing || this._validateEmail(this.state.userEmail) !== ''}
-              text={ strings.CheckStatusBtnLabel }
-              onClick={() => { this._checkUserStatus(this.state.userEmail);}}
+            data-automation-id="check"
+            disabled={!this.state.userEmail || isProcessing || this._validateEmail(this.state.userEmail) !== ''}
+            text={strings.CheckStatusBtnLabel}
+            onClick={() => { this._checkUserStatus(this.state.userEmail); }}
           />
         </div>
         {renderUserInfos}
@@ -158,11 +165,11 @@ export default class UserStatusCheckerContainer extends React.Component<IUserSta
   }
 
   private _validateEmail(value: string) {
-    
+
     if ((!/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value) || !value)) {
       return strings.EmailErrorMessage;
     } else {
-        return '';
+      return '';
     }
   }
 }
