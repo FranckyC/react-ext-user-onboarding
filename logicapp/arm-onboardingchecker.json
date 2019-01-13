@@ -38,23 +38,23 @@
                             "type": "Request",
                             "kind": "Http",
                             "inputs": {
+                                "method": "POST",
                                 "schema": {
                                     "$schema": "http://json-schema.org/draft-04/schema#",
-                                    "type": "object",
                                     "properties": {
-                                        "userAccessToken": {
+                                        "upn": {
                                             "type": "string"
                                         },
-                                        "upn": {
+                                        "userAccessToken": {
                                             "type": "string"
                                         }
                                     },
                                     "required": [
                                         "userAccessToken",
                                         "upn"
-                                    ]
-                                },
-                                "method": "POST"
+                                    ],
+                                    "type": "object"
+                                }
                             }
                         }
                     },
@@ -62,29 +62,29 @@
                         "Check_if_Internal_User": {
                             "actions": {
                                 "GetDomains": {
-                                    "runAfter": {},
-                                    "type": "Http",
                                     "inputs": {
-                                        "method": "GET",
-                                        "uri": "https://graph.microsoft.com/beta/domains?$Select=id",
                                         "headers": {
+                                            "Accept": "application/json;odata.metadata=minimal",
                                             "Authorization": "Bearer @{triggerBody()['userAccessToken']}",
-                                            "Content-Type": "application/json;odata.metadata=minimal",
-                                            "Accept": "application/json;odata.metadata=minimal"
-                                        }
-                                    }
+                                            "Content-Type": "application/json;odata.metadata=minimal"
+                                        },
+                                        "method": "GET",
+                                        "uri": "https://graph.microsoft.com/beta/domains?$Select=id"
+                                    },
+                                    "runAfter": {},
+                                    "type": "Http"
                                 },
                                 "Set_variable_ArrayCommonDomain": {
+                                    "inputs": {
+                                        "name": "ArrayCommonDomain",
+                                        "value": "@intersection(body('GetDomains').value, variables('ArrayUserDomain'))"
+                                    },
                                     "runAfter": {
                                         "GetDomains": [
                                             "Succeeded"
                                         ]
                                     },
-                                    "type": "SetVariable",
-                                    "inputs": {
-                                        "name": "ArrayCommonDomain",
-                                        "value": "@intersection(body('GetDomains').value, variables('ArrayUserDomain'))"
-                                    }
+                                    "type": "SetVariable"
                                 }
                             },
                             "runAfter": {
@@ -99,112 +99,115 @@
                                 "Check_and_Send_B2B_User_Status": {
                                     "actions": {
                                         "GetUser": {
-                                            "runAfter": {},
-                                            "type": "Http",
                                             "inputs": {
-                                                "method": "GET",
-                                                "uri": "https://graph.microsoft.com/beta/users?$filter=mail eq '@{triggerBody()?['upn']}' or userPrincipalName eq '@{triggerBody()?['upn']}'",
                                                 "headers": {
+                                                    "Accept": "application/json;odata.metadata=minimal",
                                                     "Authorization": "Bearer @{triggerBody()['userAccessToken']}",
-                                                    "Content-Type": "application/json;odata.metadata=minimal",
-                                                    "Accept": "application/json;odata.metadata=minimal"
-                                                }
-                                            }
+                                                    "Content-Type": "application/json;odata.metadata=minimal"
+                                                },
+                                                "method": "GET",
+                                                "uri": "https://graph.microsoft.com/beta/users?$filter=mail eq '@{triggerBody()['upn']}' or userPrincipalName eq '@{triggerBody()['upn']}' or startswith(userPrincipalName, '@{replace(triggerBody()['upn'], '@', '_')}') or otherMails/any(c:c+eq+'@{triggerBody()['upn']}')"
+                                            },
+                                            "runAfter": {},
+                                            "type": "Http"
                                         },
                                         "If_user_exists": {
                                             "actions": {
-                                                "Switch": {
-                                                    "runAfter": {
-                                                        "Set_ExternalUserStatus": [
-                                                            "Succeeded"
-                                                        ]
+                                                "Set_ExternalUserStatus": {
+                                                    "inputs": {
+                                                        "name": "ExternalUserStatus",
+                                                        "value": "@{actionBody('GetUser').value[0].externalUserState}"
                                                     },
+                                                    "runAfter": {},
+                                                    "type": "SetVariable"
+                                                },
+                                                "Switch": {
                                                     "cases": {
                                                         "Case": {
-                                                            "case": "PendingAcceptance",
                                                             "actions": {
                                                                 "SendPendingAcceptance": {
-                                                                    "runAfter": {},
-                                                                    "type": "Response",
-                                                                    "kind": "Http",
                                                                     "inputs": {
-                                                                        "statusCode": 200,
                                                                         "body": {
-                                                                            "Email": "@{triggerBody()?['upn']}",
+                                                                            "ConnectionName": "@{concat(substring(body('GetUser').value[0].userPrincipalName, 0, lastIndexOf(body('GetUser').value[0].userPrincipalName, '_')), replace(replace(substring(body('GetUser').value[0].userPrincipalName, 0, indexOf(body('GetUser').value[0].userPrincipalName, '#')), substring(body('GetUser').value[0].userPrincipalName, 0, lastIndexOf(body('GetUser').value[0].userPrincipalName, '_')), ''), '_', '@'))}",
+                                                                            "Email": "@{triggerBody()['upn']}",
                                                                             "Status": "3"
-                                                                        }
-                                                                    }
+                                                                        },
+                                                                        "statusCode": 200
+                                                                    },
+                                                                    "kind": "Http",
+                                                                    "runAfter": {},
+                                                                    "type": "Response"
                                                                 }
-                                                            }
+                                                            },
+                                                            "case": "PendingAcceptance"
                                                         },
                                                         "Case_2": {
-                                                            "case": "Accepted",
                                                             "actions": {
                                                                 "SendAccepted": {
-                                                                    "runAfter": {},
-                                                                    "type": "Response",
-                                                                    "kind": "Http",
                                                                     "inputs": {
-                                                                        "statusCode": 200,
                                                                         "body": {
-                                                                            "Email": "@{triggerBody()?['upn']}",
+                                                                            "ConnectionName": "@{concat(substring(body('GetUser').value[0].userPrincipalName, 0, lastIndexOf(body('GetUser').value[0].userPrincipalName, '_')), replace(replace(substring(body('GetUser').value[0].userPrincipalName, 0, indexOf(body('GetUser').value[0].userPrincipalName, '#')), substring(body('GetUser').value[0].userPrincipalName, 0, lastIndexOf(body('GetUser').value[0].userPrincipalName, '_')), ''), '_', '@'))}",
+                                                                            "Email": "@{triggerBody()['upn']}",
                                                                             "Status": "4"
-                                                                        }
-                                                                    }
+                                                                        },
+                                                                        "statusCode": 200
+                                                                    },
+                                                                    "kind": "Http",
+                                                                    "runAfter": {},
+                                                                    "type": "Response"
                                                                 }
-                                                            }
+                                                            },
+                                                            "case": "Accepted"
                                                         }
                                                     },
                                                     "default": {
                                                         "actions": {
                                                             "UndeterminedUser": {
-                                                                "runAfter": {},
-                                                                "type": "Response",
-                                                                "kind": "Http",
                                                                 "inputs": {
-                                                                    "statusCode": 200,
                                                                     "body": {
                                                                         "Email": "@{triggerBody()?['upn']}",
                                                                         "Status": "0"
-                                                                    }
-                                                                }
+                                                                    },
+                                                                    "statusCode": 200
+                                                                },
+                                                                "kind": "Http",
+                                                                "runAfter": {},
+                                                                "type": "Response"
                                                             }
                                                         }
                                                     },
                                                     "expression": "@variables('ExternalUserStatus')",
+                                                    "runAfter": {
+                                                        "Set_ExternalUserStatus": [
+                                                            "Succeeded"
+                                                        ]
+                                                    },
                                                     "type": "Switch"
-                                                },
-                                                "Set_ExternalUserStatus": {
-                                                    "runAfter": {},
-                                                    "type": "SetVariable",
-                                                    "inputs": {
-                                                        "name": "ExternalUserStatus",
-                                                        "value": "@{actionBody('GetUser').value[0].externalUserState}"
+                                                }
+                                            },
+                                            "else": {
+                                                "actions": {
+                                                    "SendUserNotExists": {
+                                                        "inputs": {
+                                                            "body": {
+                                                                "ConnectionName": "@{triggerBody()['upn']}",
+                                                                "Email": "@{triggerBody()['upn']}",
+                                                                "Status": "2"
+                                                            },
+                                                            "statusCode": 200
+                                                        },
+                                                        "kind": "Http",
+                                                        "runAfter": {},
+                                                        "type": "Response"
                                                     }
                                                 }
                                             },
+                                            "expression": "@equals(empty(body('GetUser').value), false)",
                                             "runAfter": {
                                                 "GetUser": [
                                                     "Succeeded"
                                                 ]
                                             },
-                                            "else": {
-                                                "actions": {
-                                                    "SendUserNotExists": {
-                                                        "runAfter": {},
-                                                        "type": "Response",
-                                                        "kind": "Http",
-                                                        "inputs": {
-                                                            "statusCode": 200,
-                                                            "body": {
-                                                                "Email": "@{triggerBody()?['upn']}",
-                                                                "Status": "2"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            },
-                                            "expression": "@equals(empty(body('GetUser').value), false)",
                                             "type": "If"
                                         }
                                     },
@@ -212,67 +215,48 @@
                                     "type": "Scope"
                                 }
                             },
+                            "else": {
+                                "actions": {
+                                    "SendUserInternal": {
+                                        "inputs": {
+                                            "body": {
+                                                "ConnectionName": "@{triggerBody()?['upn']}",
+                                                "Email": "@{triggerBody()?['upn']}",
+                                                "Status": "1"
+                                            },
+                                            "statusCode": 200
+                                        },
+                                        "kind": "Http",
+                                        "runAfter": {},
+                                        "type": "Response"
+                                    }
+                                }
+                            },
+                            "expression": "@equals(length(variables('ArrayCommonDomain')), 0)",
                             "runAfter": {
                                 "Check_if_Internal_User": [
                                     "Succeeded"
                                 ]
                             },
-                            "else": {
-                                "actions": {
-                                    "SendUserInternal": {
-                                        "runAfter": {},
-                                        "type": "Response",
-                                        "kind": "Http",
-                                        "inputs": {
-                                            "statusCode": 200,
-                                            "body": {
-                                                "Email": "@{triggerBody()?['upn']}",
-                                                "Status": "1"
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            "expression": "@equals(length(variables('ArrayCommonDomain')), 0)",
                             "type": "If"
                         },
-                        "Initialize_userDomain": {
+                        "Initialize_ArrayCommonDomain": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "ArrayCommonDomain",
+                                        "type": "Array"
+                                    }
+                                ]
+                            },
                             "runAfter": {
-                                "Initialize_ExternalUserStatus": [
+                                "Initialize_ArrayUserDomain": [
                                     "Succeeded"
                                 ]
                             },
-                            "type": "InitializeVariable",
-                            "inputs": {
-                                "variables": [
-                                    {
-                                        "name": "UserDomain",
-                                        "type": "String",
-                                        "value": "@{split(triggerBody()?['upn'], '@')[1]}"
-                                    }
-                                ]
-                            }
-                        },
-                        "Initialize_ExternalUserStatus": {
-                            "runAfter": {},
-                            "type": "InitializeVariable",
-                            "inputs": {
-                                "variables": [
-                                    {
-                                        "name": "ExternalUserStatus",
-                                        "type": "String"
-                                    }
-                                ]
-                            },
-                            "description": "InternalUser = 1, DoesNotExist = 2, InvitationPending = 3, InvitationAccepted = 4, Undetermined = 0"
+                            "type": "InitializeVariable"
                         },
                         "Initialize_ArrayUserDomain": {
-                            "runAfter": {
-                                "Initialize_userDomain": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "InitializeVariable",
                             "inputs": {
                                 "variables": [
                                     {
@@ -285,23 +269,43 @@
                                         ]
                                     }
                                 ]
-                            }
-                        },
-                        "Initialize_ArrayCommonDomain": {
+                            },
                             "runAfter": {
-                                "Initialize_ArrayUserDomain": [
+                                "Initialize_userDomain": [
                                     "Succeeded"
                                 ]
                             },
-                            "type": "InitializeVariable",
+                            "type": "InitializeVariable"
+                        },
+                        "Initialize_ExternalUserStatus": {
+                            "description": "InternalUser = 1, DoesNotExist = 2, InvitationPending = 3, InvitationAccepted = 4, Undetermined = 0",
                             "inputs": {
                                 "variables": [
                                     {
-                                        "name": "ArrayCommonDomain",
-                                        "type": "Array"
+                                        "name": "ExternalUserStatus",
+                                        "type": "String"
                                     }
                                 ]
-                            }
+                            },
+                            "runAfter": {},
+                            "type": "InitializeVariable"
+                        },
+                        "Initialize_userDomain": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "UserDomain",
+                                        "type": "String",
+                                        "value": "@{split(triggerBody()?['upn'], '@')[1]}"
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "Initialize_ExternalUserStatus": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable"
                         }
                     },
                     "outputs": {}
