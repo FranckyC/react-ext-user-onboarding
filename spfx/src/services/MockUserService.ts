@@ -29,7 +29,8 @@ class MockUserService implements IUserService {
                 Email: "franck.cornu@aequos.ca",
                 FirstName: "Franck",
                 LastName: "Cornu",
-                Status: IUserStatus.InternalUser
+                Status: IUserStatus.InternalUser,
+                ConnectionName: "franck.cornu@aequos.ca"
             },
             {
                 Email: "franck.cornu@outlook.com",

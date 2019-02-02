@@ -3,23 +3,27 @@
   "id": "ba25beab-d01c-4162-ad49-1fcb35a8b119",
   "alias": "UserStatusCheckerWebPart",
   "componentType": "WebPart",
-
-  // The "*" signifies that the version should be taken from the package.json
   "version": "*",
   "manifestVersion": 2,
-
-  // If true, the component can only be installed on sites where Custom Script is allowed.
-  // Components that allow authors to embed arbitrary script code should set this to true.
-  // https://support.office.com/en-us/article/Turn-scripting-capabilities-on-or-off-1f2c515f-5d7e-448a-9fd7-835da935584f
   "requiresCustomScript": false,
-
-  "preconfiguredEntries": [{
-    "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Other
-    "group": { "default": "Other" },
-    "title": { "default": "User status checker", "en-us": "User status checker", "fr-fr": "Vérificateur du status de l'utilisateur" },
-    "description": { "default": "Allows to check for an user account in the organization directory", "en-us": "Allows to check for an user account in the organization directory", "fr-fr": "Permets de vérifier le statut d'un utilisateur dans l'annuaire de l'organisation" },
-    "officeFabricIconFontName": "UserFollowed",
-    "properties": {
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "Other"
+      },
+      "title": {
+        "default": "User status checker",
+        "en-us": "User status checker",
+        "fr-fr": "Vérificateur du status de l'utilisateur"
+      },
+      "description": {
+        "default": "Allows to check for an user account in the organization directory",
+        "en-us": "Allows to check for an user account in the organization directory",
+        "fr-fr": "Permets de vérifier le statut d'un utilisateur dans l'annuaire de l'organisation"
+      },
+      "officeFabricIconFontName": "UserFollowed",
+      "properties": {}
     }
-  }]
+  ]
 }

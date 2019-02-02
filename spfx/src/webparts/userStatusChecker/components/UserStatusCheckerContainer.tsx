@@ -59,6 +59,7 @@ export default class UserStatusCheckerContainer extends React.Component<IUserSta
         case IUserStatus.InternalUser:
           personaProps.presence = PersonaPresence.online;
           personaProps.secondaryText = strings.UserStatus.InternalUser;
+          personaProps.tertiaryText = strings.ConnectionName + this.state.user.ConnectionName;
           break;
 
         case IUserStatus.InvitationAccepted:

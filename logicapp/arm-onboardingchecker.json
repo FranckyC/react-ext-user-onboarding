@@ -88,7 +88,7 @@
                                 }
                             },
                             "runAfter": {
-                                "Initialize_ArrayCommonDomain": [
+                                "Initialize_AdditionalQueryIfAlias": [
                                     "Succeeded"
                                 ]
                             },
@@ -98,6 +98,19 @@
                             "actions": {
                                 "Check_and_Send_B2B_User_Status": {
                                     "actions": {
+                                        "GetRelatedAliasEmail": {
+                                            "inputs": {
+                                                "headers": {
+                                                    "Accept": "application/json;odata.metadata=minimal",
+                                                    "Authorization": "Bearer @{triggerBody()['userAccessToken']}",
+                                                    "Content-Type": "application/json;odata.metadata=minimal"
+                                                },
+                                                "method": "GET",
+                                                "uri": "https://graph.microsoft.com/beta/contacts?$filter=proxyAddresses/any(c:c+eq+'SMTP:@{triggerBody()['upn']}')&$Select=displayName,mailNickname"
+                                            },
+                                            "runAfter": {},
+                                            "type": "Http"
+                                        },
                                         "GetUser": {
                                             "inputs": {
                                                 "headers": {
@@ -106,10 +119,42 @@
                                                     "Content-Type": "application/json;odata.metadata=minimal"
                                                 },
                                                 "method": "GET",
-                                                "uri": "https://graph.microsoft.com/beta/users?$filter=mail eq '@{triggerBody()['upn']}' or userPrincipalName eq '@{triggerBody()['upn']}' or startswith(userPrincipalName, '@{replace(triggerBody()['upn'], '@', '_')}') or otherMails/any(c:c+eq+'@{triggerBody()['upn']}')"
+                                                "uri": "https://graph.microsoft.com/beta/users?$filter=mail eq '@{triggerBody()['upn']}' or userPrincipalName eq '@{triggerBody()['upn']}' or startswith(userPrincipalName, '@{replace(triggerBody()['upn'], '@', '_')}') or otherMails/any(c:c+eq+'@{triggerBody()['upn']}')@{variables('AdditionalQueryIfAlias')}"
                                             },
-                                            "runAfter": {},
+                                            "runAfter": {
+                                                "If_Contact_Found": [
+                                                    "Succeeded"
+                                                ]
+                                            },
                                             "type": "Http"
+                                        },
+                                        "If_Contact_Found": {
+                                            "actions": {
+                                                "Set_AdditionalQueryIfAlias": {
+                                                    "inputs": {
+                                                        "name": "AdditionalQueryIfAlias",
+                                                        "value": " or startswith(userPrincipalName, '@{body('GetRelatedAliasEmail').value[0].mailNickname}_@{variables('UserDomain')}')"
+                                                    },
+                                                    "runAfter": {},
+                                                    "type": "SetVariable"
+                                                }
+                                            },
+                                            "expression": {
+                                                "and": [
+                                                    {
+                                                        "equals": [
+                                                            "@empty(body('GetRelatedAliasEmail').value)",
+                                                            "@false"
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            "runAfter": {
+                                                "GetRelatedAliasEmail": [
+                                                    "Succeeded"
+                                                ]
+                                            },
+                                            "type": "If"
                                         },
                                         "If_user_exists": {
                                             "actions": {
@@ -239,6 +284,22 @@
                                 ]
                             },
                             "type": "If"
+                        },
+                        "Initialize_AdditionalQueryIfAlias": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "AdditionalQueryIfAlias",
+                                        "type": "String"
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "Initialize_ArrayCommonDomain": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable"
                         },
                         "Initialize_ArrayCommonDomain": {
                             "inputs": {
